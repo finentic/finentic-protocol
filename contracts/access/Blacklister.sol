@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-abstract contract Blacklist {
+abstract contract Blacklister {
     mapping(address => bool) public blacklisting;
 
     event AddToBlacklist(address indexed account);

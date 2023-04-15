@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-abstract contract Whitelist {
+abstract contract Whitelister {
     mapping(address => bool) public whitelisting;
 
     event AddToWhitelist(address indexed account);

@@ -4,10 +4,10 @@
 pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./Blacklist.sol";
-import "./Whitelist.sol";
+import "./Blacklister.sol";
+import "./Whitelister.sol";
 
-contract ControlCenter is AccessControl, Blacklist, Whitelist {
+contract ControlCenter is AccessControl, Blacklister, Whitelister {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant TREASURER_ROLE = keccak256("TREASURER_ROLE");
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
@@ -18,6 +18,7 @@ contract ControlCenter is AccessControl, Blacklist, Whitelist {
         _setupRole(TREASURER_ROLE, _msgSender());
         _setupRole(MODERATOR_ROLE, _msgSender());
         _addToWhitelist(_msgSender());
+        _addToWhitelist(address(0));
     }
 
     function setRoleAdmin(
