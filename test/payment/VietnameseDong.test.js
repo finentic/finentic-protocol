@@ -65,14 +65,14 @@ describe("VietnameseDong", () => {
         account1,
       } = await loadFixture(setupFixture)
       await expect(
-        VietnameseDongInstance.connect(account1).mintFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.connect(account1).mint(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('ControlTower: TREASURER_ONLY')
     })
 
     it('Should revert when mint tokens for an account not whitelisted', async () => {
       const { VietnameseDongInstance, account1 } = await loadFixture(setupFixture)
       await expect(
-        VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('Whitelist: NOT_WHITELISTED')
     })
 
@@ -83,7 +83,7 @@ describe("VietnameseDong", () => {
         account1,
       } = await loadFixture(setupFixture)
       await expect(ControlCenterInstance.addToWhitelist(account1.address)).to.be.fulfilled
-      await expect(VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
+      await expect(VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
       expect(await VietnameseDongInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.WeiPerEther)
     })
   })
@@ -95,7 +95,7 @@ describe("VietnameseDong", () => {
         account1,
       } = await loadFixture(setupFixture)
       await expect(
-        VietnameseDongInstance.connect(account1).burnFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.connect(account1).burn(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('ControlTower: TREASURER_ONLY')
     })
 
@@ -106,10 +106,10 @@ describe("VietnameseDong", () => {
         account1,
       } = await loadFixture(setupFixture)
       await expect(ControlCenterInstance.addToWhitelist(account1.address)).to.be.fulfilled
-      await expect(VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
+      await expect(VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
       await expect(ControlCenterInstance.addToBlacklist(account1.address)).to.be.fulfilled
       await expect(
-        VietnameseDongInstance.burnFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.burn(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('Blacklist: BLACKLISTED')
     })
 
@@ -120,8 +120,8 @@ describe("VietnameseDong", () => {
         account1,
       } = await loadFixture(setupFixture)
       await expect(ControlCenterInstance.addToWhitelist(account1.address)).to.be.fulfilled
-      await expect(VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
-      await VietnameseDongInstance.burnFor(account1.address, ethers.constants.WeiPerEther)
+      await expect(VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
+      await VietnameseDongInstance.burn(account1.address, ethers.constants.WeiPerEther)
       expect(
         await VietnameseDongInstance.balanceOf(account1.address)
       ).to.deep.equal(ethers.constants.Zero)
@@ -133,7 +133,7 @@ describe("VietnameseDong", () => {
       const { VietnameseDongInstance, account1 } = await loadFixture(setupFixture)
       await expect(VietnameseDongInstance.pause()).to.be.fulfilled
       await expect(
-        VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('Pausable: paused')
     })
 
@@ -141,7 +141,7 @@ describe("VietnameseDong", () => {
       const { VietnameseDongInstance, account1 } = await loadFixture(setupFixture)
       await expect(VietnameseDongInstance.pause()).to.be.fulfilled
       await expect(
-        VietnameseDongInstance.burnFor(account1.address, ethers.constants.WeiPerEther)
+        VietnameseDongInstance.burn(account1.address, ethers.constants.WeiPerEther)
       ).to.be.revertedWith('Pausable: paused')
     })
 
@@ -154,8 +154,8 @@ describe("VietnameseDong", () => {
       await expect(VietnameseDongInstance.pause()).to.be.fulfilled
       await expect(VietnameseDongInstance.unpause()).to.be.fulfilled
       await expect(ControlCenterInstance.addToWhitelist(account1.address)).to.be.fulfilled
-      await expect(VietnameseDongInstance.mintFor(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
-      await VietnameseDongInstance.burnFor(account1.address, ethers.constants.WeiPerEther)
+      await expect(VietnameseDongInstance.mint(account1.address, ethers.constants.WeiPerEther)).to.be.fulfilled
+      await VietnameseDongInstance.burn(account1.address, ethers.constants.WeiPerEther)
       expect(
         await VietnameseDongInstance.balanceOf(account1.address)
       ).to.deep.equal(ethers.constants.Zero)

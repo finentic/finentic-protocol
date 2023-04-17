@@ -8,7 +8,8 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "../interfaces/access/IControlCenter.sol";
 
 /**
- * @dev Vietnamese Dong (VND) is a fiat-backed stablecoin launched by the Finentic.
+ * @title Vietnamese Dong (VND) is a fiat-backed stablecoin launched by the Finentic.
+ * @notice Only for who whitelisting (KYC)
  */
 
 contract VietnameseDong is ERC20, Pausable {
@@ -18,17 +19,17 @@ contract VietnameseDong is ERC20, Pausable {
         controlCenter = _controlCenter;
     }
 
-    function mintFor(address account, uint amount) external {
+    function mint(address account, uint amount) external {
         controlCenter.onlyTreasurer(_msgSender());
         _mint(account, amount);
     }
 
-    function burnFor(address account, uint amount) external {
+    function burn(address account, uint amount) external {
         controlCenter.onlyTreasurer(_msgSender());
         _burn(account, amount);
     }
 
-    function pause() public {
+    function pause() external {
         controlCenter.onlyModerator(_msgSender());
         _pause();
     }
