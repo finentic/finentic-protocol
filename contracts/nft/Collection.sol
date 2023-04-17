@@ -34,6 +34,11 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
         _;
     }
 
+    constructor() {
+        // set to prevent the implementation contract from being initialized
+        creator = address(0xdead);
+    }
+
     /**
      * @dev Initializes the contract after deployment via a minimal proxy
      */
@@ -43,6 +48,7 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
         string calldata _symbol,
         string calldata _newBaseURI
     ) external initializer {
+        require(creator == address(0), 'hehe');
         creator = _creator;
         __ERC721_init(_name, _symbol);
         baseURI = _newBaseURI;
