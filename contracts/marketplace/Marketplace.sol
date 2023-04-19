@@ -161,7 +161,7 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         );
     }
 
-    function cancleItemBuyNow(address nftContract, uint256 tokenId) external {
+    function cancelItemBuyNow(address nftContract, uint256 tokenId) external {
         ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
         require(
             _itemBuyNow.buyer == _msgSender() ||
@@ -189,6 +189,19 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
             PhygitalItemState.Cancelled,
             0
         );
+    }
+
+    function cancelListItemForBuyNow(
+        address nftContract,
+        uint256 tokenId
+    ) external {
+        ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
+        require(_itemBuyNow.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        require(
+            _itemBuyNow.buyer == address(0),
+            "Marketplace: SOLD"
+        );
+        _removeItemForAuction(nftContract, tokenId);
     }
 
     function _takeOwnItemBuyNow(address nftContract, uint256 tokenId) internal {
@@ -307,7 +320,7 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         _removeItemForAuction(nftContract, tokenId);
     }
 
-    function cancleItemAuction(address nftContract, uint256 tokenId) external {
+    function cancelItemAuction(address nftContract, uint256 tokenId) external {
         ItemAuction memory _itemAuction = itemAuction[nftContract][tokenId];
         require(
             _itemAuction.bidder == _msgSender() ||
@@ -337,4 +350,16 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         );
     }
 
+    function cancelListItemForAuction(
+        address nftContract,
+        uint256 tokenId
+    ) external {
+        ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
+        require(_itemAuction.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        require(
+            _itemAuction.startTime > block.timestamp,
+            "Marketplace: AUCTION_STARTED"
+        );
+        _removeItemForAuction(nftContract, tokenId);
+    }
 }
