@@ -63,6 +63,7 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
      * @dev If there is an offer for this amount or higher, that will be accepted instead of setting a buy price.
      * @param nftContract The address of the NFT contract.
      * @param tokenId The id of the NFT.
+     * @param isPhygital Is this NFT linked to a physical asset?
      * @param paymentToken The address of the token payment contract for this NFT.
      * @param price The price at which someone could buy this NFT.
      */
@@ -191,16 +192,32 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         );
     }
 
+    /**
+     * @notice Update the list price for an NFT.
+     * @dev A 0 price is acceptable and valid price you can set, enabling a giveaway to the first collector that calls `buy`.
+     * @param nftContract The address of the NFT contract.
+     * @param tokenId The id of the NFT.
+     * @param paymentToken The address of the token payment contract for this NFT.
+     * @param price The price at which someone could buy this NFT.
+     */
+    function updateItemForBuyNow(
+        address nftContract,
+        uint256 tokenId,
+        address paymentToken,
+        uint256 price
+    ) external {
+        ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
+        require(_itemBuyNow.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        _updateItemForBuyNow(nftContract, tokenId, paymentToken, price);
+    }
+
     function cancelListItemForBuyNow(
         address nftContract,
         uint256 tokenId
     ) external {
         ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
         require(_itemBuyNow.seller == _msgSender(), "Marketplace: FORBIDDEN");
-        require(
-            _itemBuyNow.buyer == address(0),
-            "Marketplace: SOLD"
-        );
+        require(_itemBuyNow.buyer == address(0), "Marketplace: SOLD");
         _removeItemForAuction(nftContract, tokenId);
     }
 
@@ -222,6 +239,17 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         _removeItemForBuyNow(nftContract, tokenId);
     }
 
+    /**
+     * @notice Add the auction for an NFT.
+     * @param nftContract The address of the NFT contract.
+     * @param tokenId The id of the NFT.
+     * @param isPhygital Is this NFT linked to a physical asset?
+     * @param startTime The time at which this auction will accept new bids.
+     * @param endTime The time at which this auction will not accept any new bids.
+     * @param paymentToken The address of the token payment contract for this NFT.
+     * @param amount The price at which someone could buy this NFT.
+     * @param gap The minimum price gap between two bids
+     */
     function listForAuction(
         address nftContract,
         uint256 tokenId,
@@ -347,6 +375,38 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
             tokenId,
             PhygitalItemState.Cancelled,
             0
+        );
+    }
+
+    /**
+     * @notice Update the auction for an NFT.
+     * @param nftContract The address of the NFT contract.
+     * @param tokenId The id of the NFT.
+     * @param startTime The time at which this auction will accept new bids.
+     * @param endTime The time at which this auction will not accept any new bids.
+     * @param paymentToken The address of the token payment contract for this NFT.
+     * @param amount The price at which someone could buy this NFT.
+     * @param gap The minimum price gap between two bids
+     */
+    function updateItemForAuction(
+        address nftContract,
+        uint256 tokenId,
+        uint256 startTime,
+        uint256 endTime,
+        address paymentToken,
+        uint256 amount,
+        uint256 gap
+    ) external {
+        ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
+        require(_itemAuction.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        _updateItemForAuction(
+            nftContract,
+            tokenId,
+            startTime,
+            endTime,
+            paymentToken,
+            amount,
+            gap
         );
     }
 
