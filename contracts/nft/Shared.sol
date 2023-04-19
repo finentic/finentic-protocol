@@ -24,8 +24,6 @@ contract Shared is ERC721, Pausable {
     mapping(uint => bytes) public hashedMetadata;
 
     event BaseURIUpdated(string oldBaseURI, string newBaseURI);
-    event ServiceFeeChange(uint oldServiceFee, uint newServiceFee);
-    event RescuesTokenStuck(address token, uint256 amount);
 
     constructor(
         IControlCenter _controlCenter
