@@ -40,9 +40,9 @@ contract Treasury is Context {
 
     function transferERC721(
         IERC721 token,
-        uint tokenId,
         address from,
-        address to
+        address to,
+        uint tokenId
     ) external onlyTreasurer {
         token.safeTransferFrom(from, to, tokenId);
     }
