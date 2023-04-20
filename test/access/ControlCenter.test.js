@@ -58,15 +58,15 @@ describe("ControlCenter", () => {
 
       await expect(
         ControlCenterInstance.onlyOperator(accountUnauthorized.address)
-      ).to.be.revertedWith('ControlTower: OPERATOR_ONLY')
+      ).to.be.revertedWith('ControlCenter: OPERATOR_ONLY')
 
       await expect(
         ControlCenterInstance.onlyTreasurer(accountUnauthorized.address)
-      ).to.be.revertedWith('ControlTower: TREASURER_ONLY')
+      ).to.be.revertedWith('ControlCenter: TREASURER_ONLY')
 
       await expect(
         ControlCenterInstance.onlyModerator(accountUnauthorized.address)
-      ).to.be.revertedWith('ControlTower: MODERATOR_ONLY')
+      ).to.be.revertedWith('ControlCenter: MODERATOR_ONLY')
     })
 
     it("Should set role member by admin role", async () => {

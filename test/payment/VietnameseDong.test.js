@@ -66,7 +66,7 @@ describe("VietnameseDong", () => {
       } = await loadFixture(setupFixture)
       await expect(
         VietnameseDongInstance.connect(account1).mint(account1.address, ethers.constants.WeiPerEther)
-      ).to.be.revertedWith('ControlTower: TREASURER_ONLY')
+      ).to.be.revertedWith('ControlCenter: TREASURER_ONLY')
     })
 
     it('Should revert when mint tokens for an account not whitelisted', async () => {
@@ -96,7 +96,7 @@ describe("VietnameseDong", () => {
       } = await loadFixture(setupFixture)
       await expect(
         VietnameseDongInstance.connect(account1).burn(account1.address, ethers.constants.WeiPerEther)
-      ).to.be.revertedWith('ControlTower: TREASURER_ONLY')
+      ).to.be.revertedWith('ControlCenter: TREASURER_ONLY')
     })
 
     it('Should revert burn tokens for an account in blacklist', async () => {

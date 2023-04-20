@@ -29,20 +29,20 @@ contract ControlCenter is AccessControl, Blacklister, Whitelister {
     }
 
     function onlyOperator(address account) external view {
-        require(hasRole(OPERATOR_ROLE, account), "ControlTower: OPERATOR_ONLY");
+        require(hasRole(OPERATOR_ROLE, account), "ControlCenter: OPERATOR_ONLY");
     }
 
     function onlyTreasurer(address account) external view {
         require(
             hasRole(TREASURER_ROLE, account),
-            "ControlTower: TREASURER_ONLY"
+            "ControlCenter: TREASURER_ONLY"
         );
     }
 
     function onlyModerator(address account) external view {
         require(
             hasRole(MODERATOR_ROLE, account),
-            "ControlTower: MODERATOR_ONLY"
+            "ControlCenter: MODERATOR_ONLY"
         );
     }
 
