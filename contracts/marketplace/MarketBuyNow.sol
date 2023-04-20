@@ -72,10 +72,6 @@ abstract contract MarketBuyNow {
         uint256 tokenId,
         ItemBuyNow memory _itemBuyNow
     ) internal {
-        require(
-            itemBuyNow[nftContract][tokenId].seller == address(0),
-            "MarketBuyNow: ALREADY_EXIST"
-        );
         itemBuyNow[nftContract][tokenId] = _itemBuyNow;
         emit ListForBuyNow(
             nftContract,
@@ -102,7 +98,6 @@ abstract contract MarketBuyNow {
         uint256 price
     ) internal {
         ItemBuyNow storage _itemBuyNow = itemBuyNow[nftContract][tokenId];
-        require(_itemBuyNow.buyer == address(0), "MarketBuyNow: SOLD");
         _itemBuyNow.paymentToken = paymentToken;
         _itemBuyNow.price = price;
         emit UpdateItemForBuyNow(nftContract, tokenId, paymentToken, price);

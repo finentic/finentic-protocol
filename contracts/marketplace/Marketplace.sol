@@ -12,23 +12,29 @@ import "./MarketBuyNow.sol";
 import "./MarketAuction.sol";
 
 /**
- * @title Vietnamese Dong (VND) is a fiat-backed stablecoin launched by the Finentic.
- * @notice Only for who whitelisting (KYC)
+ * @title Finentic Marketplace.
  */
 
 contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
     using Counters for Counters.Counter;
 
     enum PhygitalItemState {
+        Cancelled,
         Sold,
-        Delivered,
-        Cancelled
+        Delivered
     }
 
     struct PhygitalItem {
         PhygitalItemState state;
         uint256 nextUpdateDeadline;
     }
+
+    event PhygitalItemUpdated(
+        address nftContract,
+        uint256 tokenId,
+        PhygitalItemState state,
+        uint256 nextUpdateDeadline
+    );
 
     event Invoice(
         address indexed buyer,
@@ -37,13 +43,6 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         uint256 tokenId,
         address paymentToken,
         uint256 costs
-    );
-
-    event PhygitalItemUpdated(
-        address nftContract,
-        uint256 tokenId,
-        PhygitalItemState state,
-        uint256 nextUpdateDeadline
     );
 
     /**
@@ -208,6 +207,8 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
     ) external {
         ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
         require(_itemBuyNow.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        require(_itemBuyNow.buyer == address(0), "Marketplace: SOLD");
+        require(isPaymentToken[paymentToken], "Marketplace: UNACCEPTED_TOKEN");
         _updateItemForBuyNow(nftContract, tokenId, paymentToken, price);
     }
 
@@ -218,7 +219,12 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         ItemBuyNow memory _itemBuyNow = itemBuyNow[nftContract][tokenId];
         require(_itemBuyNow.seller == _msgSender(), "Marketplace: FORBIDDEN");
         require(_itemBuyNow.buyer == address(0), "Marketplace: SOLD");
-        _removeItemForAuction(nftContract, tokenId);
+        IERC721(nftContract).safeTransferFrom(
+            address(this),
+            _itemBuyNow.seller,
+            tokenId
+        );
+        _removeItemForBuyNow(nftContract, tokenId);
     }
 
     function _takeOwnItemBuyNow(address nftContract, uint256 tokenId) internal {
@@ -288,11 +294,7 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         IERC20 _paymentToken = IERC20(_itemAuction.paymentToken);
         _paymentToken.transferFrom(_msgSender(), address(this), amount);
         if (_itemAuction.bidder != address(0)) {
-            _paymentToken.transferFrom(
-                address(this),
-                _itemAuction.bidder,
-                _itemAuction.amount
-            );
+            _paymentToken.transfer(_itemAuction.bidder, _itemAuction.amount);
         }
         _biddingForAuction(nftContract, tokenId, _msgSender(), amount);
     }
@@ -399,6 +401,8 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
     ) external {
         ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
         require(_itemAuction.seller == _msgSender(), "Marketplace: FORBIDDEN");
+        require(_itemAuction.bidder == address(0), "Marketplace: SOLD");
+        require(isPaymentToken[paymentToken], "Marketplace: UNACCEPTED_TOKEN");
         _updateItemForAuction(
             nftContract,
             tokenId,

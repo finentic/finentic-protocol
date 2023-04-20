@@ -79,7 +79,7 @@ abstract contract MarketCore is Pausable {
     }
 
     /**
-     * @dev Rescues random funds stuck that the strat can't handle.
+     * @dev Rescue random funds stuck can't handle.
      * @param token address of the token to rescue.
      */
     function inCaseTokensGetStuck(address token) external onlyTreasurer {

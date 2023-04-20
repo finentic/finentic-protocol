@@ -95,15 +95,11 @@ abstract contract MarketAuction {
         ItemAuction memory _itemAuction
     ) internal {
         require(
-            itemAuction[nftContract][tokenId].bidder == address(0),
-            "MarketAuction: ALREADY_EXIST"
-        );
-        require(
             _itemAuction.startTime > block.timestamp,
             "MarketAuction: AUCTION_STARTED"
         );
         require(
-            (_itemAuction.startTime + 1 hours) > _itemAuction.endTime,
+            (_itemAuction.startTime + 1 hours) < _itemAuction.endTime,
             "MarketAuction: INVALID_END_TIME"
         );
         require(_itemAuction.gap > 0, "MarketAuction: GAP_ZERO");
@@ -119,19 +115,15 @@ abstract contract MarketAuction {
     ) internal {
         ItemAuction memory _itemAuction = itemAuction[nftContract][tokenId];
         require(
-            itemAuction[nftContract][tokenId].seller != address(0),
-            "MarketAuction: NOT_EXIST"
-        );
-        require(
-            _itemAuction.startTime > block.timestamp,
+            _itemAuction.startTime < block.timestamp,
             "MarketAuction: NOT_STARTED"
         );
         require(
-            _itemAuction.endTime < block.timestamp,
+            _itemAuction.endTime > block.timestamp,
             "MarketAuction: AUCTION_ENDED"
         );
         require(
-            _itemAuction.amount + _itemAuction.gap >= amount,
+            _itemAuction.amount + _itemAuction.gap <= amount,
             "MarketAuction: AMOUNT_TOO_LOW"
         );
 
@@ -161,15 +153,6 @@ abstract contract MarketAuction {
         uint256 gap
     ) internal {
         ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
-        require(
-            _itemAuction.bidder != address(0),
-            "MarketAuction: NOT_EXIST"
-        );
-        require(startTime > block.timestamp, "MarketAuction: AUCTION_STARTED");
-        require(
-            (startTime + 1 hours) <= endTime,
-            "MarketAuction: INVALID_END_TIME"
-        );
         require(gap > 0, "MarketAuction: GAP_ZERO");
         _itemAuction.startTime = startTime;
         _itemAuction.endTime = endTime;
@@ -194,7 +177,7 @@ abstract contract MarketAuction {
      */
     function _removeItemForAuction(address nftContract, uint256 tokenId) internal {
         require(
-            itemAuction[nftContract][tokenId].endTime > block.timestamp,
+            itemAuction[nftContract][tokenId].endTime < block.timestamp,
             "MarketAuction: AUCTION_ACTIVE"
         );
         delete itemAuction[nftContract][tokenId];
