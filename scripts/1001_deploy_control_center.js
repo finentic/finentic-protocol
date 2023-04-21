@@ -1,5 +1,5 @@
 // npx hardhat run scripts/1001_deploy_control_center.js --network fuji
-// npx hardhat verify ControlCenter@0x33801353c0810C09Dd15EeA23CcBE56856B021D2 --network fuji
+// npx hardhat verify ControlCenter@0x63Ed19D06bADBBcBED27343959a10Aff31E73304 --network fuji
 
 const { ethers, run } = require("hardhat")
 
@@ -11,7 +11,7 @@ async function main() {
   const ControlCenterInstance = await ControlCenter.deploy()
   await ControlCenterInstance.deployed()
 
-  console.log(`ControlCenter deployed to ${ControlCenterInstance.address}`)
+  console.log(`Control Center deployed to ${ControlCenterInstance.address}`)
 
   // Verify contract
   try {

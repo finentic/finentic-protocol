@@ -1,9 +1,9 @@
 // npx hardhat run scripts/1003_deploy_shared.js --network fuji
-// npx hardhat verify Shared@0x1C72E9DC564bd7a25da72FF66797De8679e27F4D --network fuji
+// npx hardhat verify Shared@0x6fCa3D791aE84333f6CfBa97518E201C6DFD4830 --network fuji
 
 const { ethers, run } = require("hardhat")
 const ADDRESSES = {
-  CONTROL_CENTER: '0x33801353c0810C09Dd15EeA23CcBE56856B021D2'
+  CONTROL_CENTER: '0x63Ed19D06bADBBcBED27343959a10Aff31E73304'
 }
 
 async function main() {
@@ -20,7 +20,7 @@ async function main() {
   // Verify contract
   try {
     await run("verify:verify", {
-      contract: "contracts/nft/Shared.sol:FinenticSharedNFT",
+      contract: "contracts/nft/Shared.sol:Shared",
       address: SharedInstance.address,
       constructorArguments: paramsShared,
     })

@@ -1,5 +1,5 @@
 // npx hardhat run scripts/1004_deploy_collection_implementation.js --network fuji
-// npx hardhat verify Collection@0x1C72E9DC564bd7a25da72FF66797De8679e27F4D --network fuji
+// npx hardhat verify Collection@0x16955BC17a69F75F808A57177705Cf81b2D5C492 --network fuji
 
 const { ethers, run } = require("hardhat")
 
@@ -11,12 +11,12 @@ async function main() {
   const CollectionInstance = await Collection.deploy()
   await CollectionInstance.deployed()
 
-  console.log(`NFT Collection Implementation deployed to ${CollectionInstance.address}`)
+  console.log(`Collection Implementation deployed to ${CollectionInstance.address}`)
 
   // Verify contract
   try {
     await run("verify:verify", {
-      contract: "contracts/nft/Collection.sol:NFTCollectionImplementation",
+      contract: "contracts/nft/Collection.sol:Collection",
       address: CollectionInstance.address,
     })
   } catch (error) { console.info(error) }

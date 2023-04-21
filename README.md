@@ -32,6 +32,17 @@ Finentic Token Crowd Sale is a base contract for managing a token crowd sale, al
 
 Finentic Marketplace is an online non-fungible token (NFT) marketplace. The Finentic Marketplace offers a marketplace allowing for non-fungible tokens to be sold through an auction.
 
+## Finentic contract deployment addresses
+
+| Name               | Address                                                                                                                            |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| ControlCenter      | [0x63Ed19D06bADBBcBED27343959a10Aff31E73304](https://testnet.snowtrace.io/address/0x63Ed19D06bADBBcBED27343959a10Aff31E73304#code) |
+| VietnameseDong     | [0x34a25677f3BE20Ec75E0F07472E6b4BE13365691](https://testnet.snowtrace.io/address/0x34a25677f3BE20Ec75E0F07472E6b4BE13365691#code) |
+| Shared             | [0x6fCa3D791aE84333f6CfBa97518E201C6DFD4830](https://testnet.snowtrace.io/address/0x6fCa3D791aE84333f6CfBa97518E201C6DFD4830#code) |
+| Collection         | [0x16955BC17a69F75F808A57177705Cf81b2D5C492](https://testnet.snowtrace.io/address/0x16955BC17a69F75F808A57177705Cf81b2D5C492#code) |
+| CollectionFactory  | [0xaf18dAB0b3f2B412c4176e95bA65000dd2bb0a66](https://testnet.snowtrace.io/address/0xaf18dAB0b3f2B412c4176e95bA65000dd2bb0a66#code) |
+| Treasury           | [0x581cfE1d12b36f20e441C196011275Ca72a09977](https://testnet.snowtrace.io/address/0x581cfE1d12b36f20e441C196011275Ca72a09977#code) |
+| Marketplace        | [0xf21eF335872bfA200066335C9883Eeb325175f54](https://testnet.snowtrace.io/address/0xf21eF335872bfA200066335C9883Eeb325175f54#code) |
 
 ## License
 

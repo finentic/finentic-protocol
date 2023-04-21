@@ -1,9 +1,9 @@
 // npx hardhat run scripts/1002_deploy_vietnamese_dong.js --network fuji
-// npx hardhat verify VietnameseDong@0x8A6Dc74b8a8815E44ed492fB711fB5a83A9Fe863 --network fuji
+// npx hardhat verify VietnameseDong@0x34a25677f3BE20Ec75E0F07472E6b4BE13365691 --network fuji
 
 const { ethers, run } = require("hardhat")
 const ADDRESSES = {
-  CONTROL_CENTER: '0x33801353c0810C09Dd15EeA23CcBE56856B021D2'
+  CONTROL_CENTER: '0x63Ed19D06bADBBcBED27343959a10Aff31E73304'
 }
 
 async function main() {
