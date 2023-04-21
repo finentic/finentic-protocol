@@ -48,7 +48,7 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
         string calldata _symbol,
         string calldata _newBaseURI
     ) external initializer {
-        require(creator == address(0), 'hehe');
+        require(creator == address(0), "Collection: ONLY_INITIALIZE");
         creator = _creator;
         __ERC721_init(_name, _symbol);
         baseURI = _newBaseURI;

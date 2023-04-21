@@ -48,6 +48,7 @@ describe("Collection", () => {
 
     return {
       ControlCenterInstance,
+      CollectionImplementationInstance,
       CollectionFactoryInstance,
       CollectionInstance,
       collectionParams,
@@ -83,7 +84,14 @@ describe("Collection", () => {
     })
 
     it("Should revert when initialize after initialized", async () => {
-      const { CollectionInstance, collectionParams } = await loadFixture(setupFixture)
+      const { 
+        CollectionImplementationInstance,
+        CollectionInstance,
+        collectionParams,
+      } = await loadFixture(setupFixture)
+      await expect(
+        CollectionImplementationInstance.initialize(...collectionParams)
+      ).to.be.revertedWith('Collection: ONLY_INITIALIZE')
       await expect(
         CollectionInstance.initialize(...collectionParams)
       ).to.be.revertedWith('Initializable: contract is already initialized')
