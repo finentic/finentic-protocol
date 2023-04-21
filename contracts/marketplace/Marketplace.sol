@@ -140,7 +140,7 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
     ) external {
         PhygitalItem memory _phygitalItem = phygitalItem[nftContract][tokenId];
         require(
-            phygitalItem[nftContract][tokenId].state == PhygitalItemState.Sold,
+            _phygitalItem.state == PhygitalItemState.Sold,
             "Marketplace: UNSOLD"
         );
         require(
@@ -329,6 +329,33 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
         );
     }
 
+    function confirmReceivedItemAuction(
+        address nftContract,
+        uint256 tokenId
+    ) external {
+        PhygitalItem memory _phygitalItem = phygitalItem[nftContract][tokenId];
+        require(
+            itemAuction[nftContract][tokenId].bidder == _msgSender(),
+            "Marketplace: FORBIDDEN"
+        );
+        require(
+            _phygitalItem.state == PhygitalItemState.Sold,
+            "Marketplace: UNSOLD"
+        );
+        require(
+            _phygitalItem.nextUpdateDeadline > block.timestamp,
+            "Marketplace: OVERDUE"
+        );
+        _takeOwnItemAuction(nftContract, tokenId);
+        delete phygitalItem[nftContract][tokenId];
+        emit PhygitalItemUpdated(
+            nftContract,
+            tokenId,
+            PhygitalItemState.Sold,
+            0
+        );
+    }
+
     function _takeOwnItemAuction(
         address nftContract,
         uint256 tokenId
@@ -420,9 +447,11 @@ contract Marketplace is MarketBuyNow, MarketAuction, MarketCore {
     ) external {
         ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
         require(_itemAuction.seller == _msgSender(), "Marketplace: FORBIDDEN");
-        require(
-            _itemAuction.startTime > block.timestamp,
-            "Marketplace: AUCTION_STARTED"
+        require(_itemAuction.bidder == address(0), "Marketplace: SOLD");
+        IERC721(nftContract).safeTransferFrom(
+            address(this),
+            _itemAuction.seller,
+            tokenId
         );
         _removeItemForAuction(nftContract, tokenId);
     }

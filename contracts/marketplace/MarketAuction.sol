@@ -175,9 +175,14 @@ abstract contract MarketAuction {
      * @param nftContract The address of the NFT contract.
      * @param tokenId The id of the NFT.
      */
-    function _removeItemForAuction(address nftContract, uint256 tokenId) internal {
+    function _removeItemForAuction(
+        address nftContract,
+        uint256 tokenId
+    ) internal {
+        ItemAuction storage _itemAuction = itemAuction[nftContract][tokenId];
         require(
-            itemAuction[nftContract][tokenId].endTime < block.timestamp,
+            _itemAuction.startTime > block.timestamp ||
+                _itemAuction.endTime < block.timestamp,
             "MarketAuction: AUCTION_ACTIVE"
         );
         delete itemAuction[nftContract][tokenId];
