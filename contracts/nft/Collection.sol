@@ -26,8 +26,6 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
     mapping(uint => bytes) public hashedMetadata;
 
     event BaseURIUpdated(string oldBaseURI, string newBaseURI);
-    event ServiceFeeChange(uint oldServiceFee, uint newServiceFee);
-    event RescuesTokenStuck(address token, uint amount);
 
     modifier onlyCreator() {
         require(creator == _msgSender(), "Collection: ONLY_CREATOR");
