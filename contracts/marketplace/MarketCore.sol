@@ -31,7 +31,7 @@ abstract contract MarketCore is Pausable {
     constructor(IControlCenter _controlCenter, address _treasury) {
         controlCenter = _controlCenter;
         treasury = _treasury;
-        serviceFeePercent = 0; // 0.00%
+        serviceFeePercent = 125; // 1.25%
         deliveryDuration = 30 days;
         // reimbursementFeePercent = 500; // 5.00%
     }

@@ -148,6 +148,7 @@ contract Marketplace is MarketItem, MarketCore {
     function paymentProcessing(address nftContract, uint256 tokenId) external {
         ItemListed memory _itemListed = itemListed[nftContract][tokenId];
         require(_itemListed.buyer == _msgSender(), "Marketplace: FORBIDDEN");
+        require(!_itemListed.isFixedPrice, "Marketplace: FIXED_PRICE_ITEM");
         if (!_itemListed.isRequiredShipping) {
             return _takeOwnItem(nftContract, tokenId);
         }
@@ -186,34 +187,6 @@ contract Marketplace is MarketItem, MarketCore {
         emit ShippingUpdated(nftContract, tokenId, ShippingState.Delivered, 0);
     }
 
-    function cancelItemDelivering(
-        address nftContract,
-        uint256 tokenId
-    ) external {
-        ItemListed memory _itemListed = itemListed[nftContract][tokenId];
-        require(
-            _itemListed.buyer == _msgSender() ||
-                _itemListed.seller == _msgSender(),
-            "Marketplace: FORBIDDEN"
-        );
-        require(
-            itemShipping[nftContract][tokenId].state == ShippingState.Sold,
-            "Marketplace: UNSOLD"
-        );
-        IERC20(_itemListed.paymentToken).transfer(
-            _itemListed.buyer,
-            _itemListed.amount
-        );
-        IERC721(nftContract).safeTransferFrom(
-            address(this),
-            _itemListed.seller,
-            tokenId
-        );
-        _removeItemListed(nftContract, tokenId);
-        delete itemShipping[nftContract][tokenId];
-        emit ShippingUpdated(nftContract, tokenId, ShippingState.Cancelled, 0);
-    }
-
     /**
      * @notice Update the auction for an NFT.
      * @param nftContract The address of the NFT contract.
@@ -246,6 +219,34 @@ contract Marketplace is MarketItem, MarketCore {
             paymentToken,
             amount
         );
+    }
+
+    function cancelItemDelivering(
+        address nftContract,
+        uint256 tokenId
+    ) external {
+        ItemListed memory _itemListed = itemListed[nftContract][tokenId];
+        require(
+            _itemListed.buyer == _msgSender() ||
+                _itemListed.seller == _msgSender(),
+            "Marketplace: FORBIDDEN"
+        );
+        require(
+            itemShipping[nftContract][tokenId].state == ShippingState.Sold,
+            "Marketplace: UNSOLD"
+        );
+        IERC20(_itemListed.paymentToken).transfer(
+            _itemListed.buyer,
+            _itemListed.amount
+        );
+        IERC721(nftContract).safeTransferFrom(
+            address(this),
+            _itemListed.seller,
+            tokenId
+        );
+        _removeItemListed(nftContract, tokenId);
+        delete itemShipping[nftContract][tokenId];
+        emit ShippingUpdated(nftContract, tokenId, ShippingState.Cancelled, 0);
     }
 
     function cancelListItem(address nftContract, uint256 tokenId) external {

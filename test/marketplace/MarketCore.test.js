@@ -62,7 +62,7 @@ describe("MarketCore", () => {
       } = await loadFixture(setupFixture)
       expect(await MarketplaceInstance.controlCenter()).to.equal(ControlCenterInstance.address)
       expect(await MarketplaceInstance.treasury()).to.equal(TreasuryInstance.address)
-      expect(await MarketplaceInstance.serviceFeePercent()).to.equal(ethers.constants.Zero) // 0.00%
+      expect((await MarketplaceInstance.serviceFeePercent()).toString()).to.equal('125') // 1.25%
       expect(await MarketplaceInstance.deliveryDuration()).to.deep.equal(ethers.BigNumber.from('30').mul('24').mul('60').mul('60')) // 30 days
     })
 
@@ -173,7 +173,7 @@ describe("MarketCore", () => {
     })
   })
 
-  describe('Rescue random funds', async () => {
+  describe('Rescue random funds', () => {
     it('Should rescue random funds stuck', async () => {
       const {
         MarketplaceInstance,

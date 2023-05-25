@@ -148,11 +148,13 @@ abstract contract MarketItem {
     ) internal {
         ItemListed storage _item = itemListed[nftContract][tokenId];
 
-        require(
-            _item.startTime > block.timestamp ||
-                _item.endTime < block.timestamp,
-            "MarketListed: LISTING"
-        );
+        if (!_item.isFixedPrice) {
+            require(
+                _item.startTime > block.timestamp ||
+                    _item.endTime < block.timestamp,
+                "MarketListed: LISTING"
+            );
+        }
         // require(gap > 0, "MarketListed: GAP_ZERO");
 
         _item.startTime = startTime;
