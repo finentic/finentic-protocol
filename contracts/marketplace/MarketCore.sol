@@ -17,8 +17,8 @@ abstract contract MarketCore is Pausable {
     address public immutable treasury;
     uint public constant PERCENTAGE = 10000; // x100 percent precision (100.00%)
     uint public serviceFeePercent;
-    // uint public reimbursementFeePercent;
     uint public deliveryDuration;
+    // uint public reimbursementFeePercent;
 
     mapping(address => bool) public isPaymentToken;
 
@@ -31,9 +31,9 @@ abstract contract MarketCore is Pausable {
     constructor(IControlCenter _controlCenter, address _treasury) {
         controlCenter = _controlCenter;
         treasury = _treasury;
-        serviceFeePercent = 1; // 0.01%
+        serviceFeePercent = 0; // 0.00%
+        deliveryDuration = 30 days;
         // reimbursementFeePercent = 500; // 5.00%
-        deliveryDuration = 2 weeks;
     }
 
     modifier onlyModerator() {

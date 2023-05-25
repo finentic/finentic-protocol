@@ -22,8 +22,8 @@ describe("MarketCore", () => {
     const VietnameseDong = await ethers.getContractFactory("VietnameseDong")
     const VietnameseDongInstance = await VietnameseDong.deploy(ControlCenterInstance.address)
 
-    const Shared = await ethers.getContractFactory("Shared")
-    const SharedInstance = await Shared.deploy(ControlCenterInstance.address)
+    const SharedNFT = await ethers.getContractFactory("SharedNFT")
+    const SharedInstance = await SharedNFT.deploy(ControlCenterInstance.address)
     await SharedInstance.updateBaseURI('ipfs://')
 
     const Treasury = await ethers.getContractFactory("Treasury")
@@ -62,8 +62,8 @@ describe("MarketCore", () => {
       } = await loadFixture(setupFixture)
       expect(await MarketplaceInstance.controlCenter()).to.equal(ControlCenterInstance.address)
       expect(await MarketplaceInstance.treasury()).to.equal(TreasuryInstance.address)
-      expect(await MarketplaceInstance.serviceFeePercent()).to.equal(ethers.constants.One)
-      expect(await MarketplaceInstance.deliveryDuration()).to.deep.equal(ethers.BigNumber.from('2').mul('7').mul('24').mul('60').mul('60'))
+      expect(await MarketplaceInstance.serviceFeePercent()).to.equal(ethers.constants.Zero) // 0.00%
+      expect(await MarketplaceInstance.deliveryDuration()).to.deep.equal(ethers.BigNumber.from('30').mul('24').mul('60').mul('60')) // 30 days
     })
 
     it('Should able to receiving ERC721', async () => {
@@ -85,7 +85,7 @@ describe("MarketCore", () => {
         ['string'],
         ['metadata of nft']
       )
-      await SharedInstance.mint(accountOwner.address, hashedMetadata)
+      await SharedInstance.mint(hashedMetadata)
       await SharedInstance.transferFrom(
         accountOwner.address,
         MarketplaceInstance.address,
