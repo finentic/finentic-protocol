@@ -94,6 +94,7 @@ contract ControlCenter is AccessControl, Blacklister, Whitelister {
     function addMultiToBlacklist(
         address[] calldata accounts
     ) external onlyRole(MODERATOR_ROLE) {
+        _removeMultiFromWhitelist(accounts);
         _addMultiToBlacklist(accounts);
     }
 

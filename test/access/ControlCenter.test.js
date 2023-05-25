@@ -325,7 +325,7 @@ describe("ControlCenter", () => {
       const { ControlCenterInstance } = await loadFixture(setupFixture)
       await expect(
         ControlCenterInstance.addMultiToBlacklist([])
-      ).to.be.revertedWith('Blacklist: EMPTY_ARRAY')
+      ).to.be.revertedWith('Whitelist: EMPTY_ARRAY')
     })
 
     it(
