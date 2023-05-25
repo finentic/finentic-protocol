@@ -26,6 +26,7 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
     mapping(uint => bytes) public hashedMetadata;
 
     event BaseURIUpdated(string oldBaseURI, string newBaseURI);
+    event CreatorUpdated(address oldCreator, address newCreator);
 
     modifier onlyCreator() {
         require(creator == _msgSender(), "Collection: ONLY_CREATOR");
@@ -52,21 +53,19 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
         baseURI = _newBaseURI;
     }
 
-    function currentTokenId() external view returns (uint) {
+    function totalSupply() external view returns (uint) {
         return _tokenIdCounter.current();
     }
 
     /**
-     * @param to The owner of the NFT to mint.
      * @param _hashedMetadata The hashed (keccak256) of metadata
      * @return tokenId The tokenId of the newly minted NFT.
      */
     function mint(
-        address to,
         bytes calldata _hashedMetadata
     ) external onlyCreator returns (uint tokenId) {
         tokenId = _tokenIdCounter.current();
-        _mint(to, tokenId);
+        _mint(_msgSender(), tokenId);
         hashedMetadata[tokenId] = _hashedMetadata;
         _tokenIdCounter.increment();
     }
@@ -74,18 +73,16 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
     /**
      * @notice Mint an NFT and approves the provided operator address.
      * @dev It can be used the first time they mint to save having to issue a separate approval transaction before listing the NFT for sale.
-     * @param to The owner of the NFT to mint.
      * @param operator The address to set as an approved operator for the creator's account.
      * @param _hashedMetadata The hashed (keccak256) of metadata
      * @return tokenId The tokenId of the newly minted NFT.
      */
     function mintAndApprove(
-        address to,
         address operator,
         bytes calldata _hashedMetadata
     ) external onlyCreator returns (uint tokenId) {
         tokenId = _tokenIdCounter.current();
-        _mint(to, tokenId);
+        _mint(_msgSender(), tokenId);
         _approve(operator, tokenId);
         hashedMetadata[tokenId] = _hashedMetadata;
         _tokenIdCounter.increment();
@@ -109,4 +106,8 @@ contract Collection is ERC721Upgradeable, PausableUpgradeable {
         baseURI = newBaseURI;
     }
 
+    function updateCreator(address newCreator) external onlyCreator {
+        emit CreatorUpdated(creator, newCreator);
+        creator = newCreator;
+    }
 }

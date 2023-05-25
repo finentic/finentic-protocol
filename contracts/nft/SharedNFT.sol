@@ -12,7 +12,7 @@ import "../interfaces/access/IControlCenter.sol";
  * @title Finentic Shared NFT (FxNFT) is a single contract allowing any creator to mint an NFT.
  */
 
-contract Shared is ERC721, Pausable {
+contract SharedNFT is ERC721, Pausable {
     using Counters for Counters.Counter;
 
     IControlCenter public immutable controlCenter;
@@ -31,22 +31,21 @@ contract Shared is ERC721, Pausable {
         controlCenter = _controlCenter;
     }
 
-    function currentTokenId() external view returns (uint) {
+    function totalSupply() external view returns (uint) {
         return _tokenIdCounter.current();
     }
 
     /**
-     * @param to The owner of the NFT to mint.
      * @param _hashedMetadata The hashed (keccak256) of metadata
      * @return tokenId The tokenId of the newly minted NFT.
      */
     function mint(
-        address to,
         bytes calldata _hashedMetadata
     ) external returns (uint tokenId) {
-        controlCenter.notInBlacklisted(_msgSender());
+        address creator = _msgSender();
         tokenId = _tokenIdCounter.current();
-        _mint(to, tokenId);
+        controlCenter.notInBlacklisted(creator);
+        _mint(creator, tokenId);
         hashedMetadata[tokenId] = _hashedMetadata;
         _tokenIdCounter.increment();
     }
@@ -54,19 +53,18 @@ contract Shared is ERC721, Pausable {
     /**
      * @notice Mint an NFT and approves the provided operator address.
      * @dev It can be used the first time they mint to save having to issue a separate approval transaction before listing the NFT for sale.
-     * @param to The owner of the NFT to mint.
      * @param operator The address to set as an approved operator for the creator's account.
      * @param _hashedMetadata The hashed (keccak256) of metadata
      * @return tokenId The tokenId of the newly minted NFT.
      */
     function mintAndApprove(
-        address to,
         address operator,
         bytes calldata _hashedMetadata
     ) external returns (uint tokenId) {
-        controlCenter.notInBlacklisted(_msgSender());
+        address creator = _msgSender();
         tokenId = _tokenIdCounter.current();
-        _mint(to, tokenId);
+        controlCenter.notInBlacklisted(creator);
+        _mint(creator, tokenId);
         _approve(operator, tokenId);
         hashedMetadata[tokenId] = _hashedMetadata;
         _tokenIdCounter.increment();
@@ -77,7 +75,7 @@ contract Shared is ERC721, Pausable {
      * @param tokenId The ID of the NFT to burn.
      */
     function burn(uint256 tokenId) external {
-        require(_ownerOf(tokenId) == _msgSender(), "Shared: ONLY_OWNER");
+        require(_ownerOf(tokenId) == _msgSender(), "SharedNFT: ONLY_OWNER");
         _burn(tokenId);
     }
 

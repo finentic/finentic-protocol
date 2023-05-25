@@ -1,11 +1,11 @@
-// npx hardhat test ./test/nft/Shared.test.js --network hardhat
-// npx hardhat coverage --testfiles ./test/nft/Shared.test.js --network hardhat
+// npx hardhat test ./test/nft/SharedNFT.test.js --network hardhat
+// npx hardhat coverage --testfiles ./test/nft/SharedNFT.test.js --network hardhat
 
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 const { expect } = require("chai")
 const { ethers } = require("hardhat")
 
-describe("Shared", () => {
+describe("SharedNFT", () => {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
@@ -16,8 +16,8 @@ describe("Shared", () => {
     const ControlCenter = await ethers.getContractFactory("ControlCenter")
     const ControlCenterInstance = await ControlCenter.deploy()
 
-    const Shared = await ethers.getContractFactory("Shared")
-    const SharedInstance = await Shared.deploy(ControlCenterInstance.address)
+    const SharedNFT = await ethers.getContractFactory("SharedNFT")
+    const SharedInstance = await SharedNFT.deploy(ControlCenterInstance.address)
     await SharedInstance.updateBaseURI('ipfs://')
 
     return {
@@ -49,7 +49,7 @@ describe("Shared", () => {
 
     it("Should not have any total supply", async () => {
       const { SharedInstance } = await loadFixture(setupFixture)
-      expect(await SharedInstance.currentTokenId()).to.deep.equal(ethers.constants.Zero)
+      expect(await SharedInstance.totalSupply()).to.deep.equal(ethers.constants.Zero)
     })
 
     it('Should have control center', async () => {
@@ -68,27 +68,12 @@ describe("Shared", () => {
       const {
         ControlCenterInstance,
         SharedInstance,
-        account1,
         accountUnauthorized,
       } = await loadFixture(setupFixture)
       await expect(ControlCenterInstance.addToBlacklist(accountUnauthorized.address)).to.be.fulfilled
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        SharedInstance.connect(accountUnauthorized).mint(account1.address, hashedMetadata)
-      ).to.be.revertedWith('Blacklist: BLACKLISTED')
-    })
-
-    it('Should revert when mint NFT to an account blacklisted', async () => {
-      const {
-        ControlCenterInstance,
-        SharedInstance,
-        account1,
-        accountUnauthorized,
-      } = await loadFixture(setupFixture)
-      await expect(ControlCenterInstance.addToBlacklist(accountUnauthorized.address)).to.be.fulfilled
-      const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
-      await expect(
-        SharedInstance.connect(account1).mint(accountUnauthorized.address, hashedMetadata)
+        SharedInstance.connect(accountUnauthorized).mint(hashedMetadata)
       ).to.be.revertedWith('Blacklist: BLACKLISTED')
     })
 
@@ -98,9 +83,9 @@ describe("Shared", () => {
         account1,
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
-      await expect(SharedInstance.connect(account1).mint(account1.address, hashedMetadata)).to.be.fulfilled
+      await expect(SharedInstance.connect(account1).mint(hashedMetadata)).to.be.fulfilled
       expect(await SharedInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.One)
-      expect(await SharedInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
+      expect(await SharedInstance.totalSupply()).to.deep.equal(ethers.constants.One)
       expect(await SharedInstance.ownerOf(ethers.constants.Zero)).to.equal(account1.address)
       expect(await SharedInstance.getApproved(ethers.constants.Zero)).to.equal(ethers.constants.AddressZero)
       expect(await SharedInstance.tokenURI(ethers.constants.Zero)).to.equal('ipfs://' + '0')
@@ -116,10 +101,10 @@ describe("Shared", () => {
       await expect(
         SharedInstance
           .connect(account1)
-          .mintAndApprove(account1.address, account2.address, hashedMetadata)
+          .mintAndApprove(account2.address, hashedMetadata)
       ).to.be.fulfilled
       expect(await SharedInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.One)
-      expect(await SharedInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
+      expect(await SharedInstance.totalSupply()).to.deep.equal(ethers.constants.One)
       expect(await SharedInstance.ownerOf(ethers.constants.Zero)).to.equal(account1.address)
       expect(await SharedInstance.getApproved(ethers.constants.Zero)).to.equal(account2.address)
       expect(await SharedInstance.tokenURI(ethers.constants.Zero)).to.equal('ipfs://' + '0')
@@ -130,14 +115,13 @@ describe("Shared", () => {
     it('Should revert burn NFT by account not own it', async () => {
       const {
         SharedInstance,
-        account1,
         accountUnauthorized,
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
-      await expect(SharedInstance.mint(account1.address, hashedMetadata)).to.be.fulfilled
+      await expect(SharedInstance.mint(hashedMetadata)).to.be.fulfilled
       await expect(
         SharedInstance.connect(accountUnauthorized).burn(ethers.constants.Zero)
-      ).to.be.revertedWith('Shared: ONLY_OWNER')
+      ).to.be.revertedWith('SharedNFT: ONLY_OWNER')
     })
 
     it('Should revert burn NFT for an account in blacklist', async () => {
@@ -149,13 +133,13 @@ describe("Shared", () => {
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        SharedInstance.connect(account1).mint(accountUnauthorized.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(
-        ControlCenterInstance.addToBlacklist(accountUnauthorized.address)
+        ControlCenterInstance.addToBlacklist(account1.address)
       ).to.be.fulfilled
       await expect(
-        SharedInstance.connect(accountUnauthorized).burn(ethers.constants.Zero)
+        SharedInstance.connect(account1).burn(ethers.constants.Zero)
       ).to.be.revertedWith('Blacklist: BLACKLISTED')
     })
 
@@ -166,11 +150,11 @@ describe("Shared", () => {
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        SharedInstance.connect(account1).mint(account1.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(SharedInstance.connect(account1).burn(ethers.constants.Zero)).to.be.fulfilled
       expect(await SharedInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.Zero)
-      expect(await SharedInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
+      expect(await SharedInstance.totalSupply()).to.deep.equal(ethers.constants.One)
       await expect(
         SharedInstance.ownerOf(ethers.constants.Zero)
       ).to.be.revertedWith('ERC721: invalid token ID')
@@ -183,7 +167,7 @@ describe("Shared", () => {
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(SharedInstance.pause()).to.be.fulfilled
       await expect(
-        SharedInstance.connect(account1).mint(account1.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.revertedWith('Pausable: paused')
     })
 
@@ -191,7 +175,7 @@ describe("Shared", () => {
       const { SharedInstance, account1, account2 } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        SharedInstance.connect(account1).mint(account1.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(SharedInstance.pause()).to.be.fulfilled
       await expect(
@@ -205,7 +189,7 @@ describe("Shared", () => {
       const { SharedInstance, account1 } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        SharedInstance.connect(account1).mint(account1.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(SharedInstance.pause()).to.be.fulfilled
       await expect(
@@ -222,7 +206,7 @@ describe("Shared", () => {
       await expect(SharedInstance.pause()).to.be.fulfilled
       await expect(SharedInstance.unpause()).to.be.fulfilled
       await expect(
-        SharedInstance.connect(account1).mint(account1.address, hashedMetadata)
+        SharedInstance.connect(account1).mint(hashedMetadata)
       ).to.be.fulfilled
     })
   })

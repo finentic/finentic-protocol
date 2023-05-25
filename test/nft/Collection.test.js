@@ -80,11 +80,11 @@ describe("Collection", () => {
 
     it("Should not have any total supply", async () => {
       const { CollectionInstance } = await loadFixture(setupFixture)
-      expect(await CollectionInstance.currentTokenId()).to.deep.equal(ethers.constants.Zero)
+      expect(await CollectionInstance.totalSupply()).to.deep.equal(ethers.constants.Zero)
     })
 
     it("Should revert when initialize after initialized", async () => {
-      const { 
+      const {
         CollectionImplementationInstance,
         CollectionInstance,
         collectionParams,
@@ -138,22 +138,21 @@ describe("Collection", () => {
       await expect(
         CollectionInstance
           .connect(accountUnauthorized)
-          .mint(accountUnauthorized.address, hashedMetadata)
+          .mint(hashedMetadata)
       ).to.be.revertedWith('Collection: ONLY_CREATOR')
     })
 
-    it('Should mint NFT for an account any', async () => {
+    it('Should mint NFT', async () => {
       const {
         CollectionInstance,
         collectionParams,
         accountCreator,
-        account1,
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
-      await expect(CollectionInstance.connect(accountCreator).mint(account1.address, hashedMetadata)).to.be.fulfilled
-      expect(await CollectionInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.One)
-      expect(await CollectionInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
-      expect(await CollectionInstance.ownerOf(ethers.constants.Zero)).to.equal(account1.address)
+      await expect(CollectionInstance.connect(accountCreator).mint(hashedMetadata)).to.be.fulfilled
+      expect(await CollectionInstance.balanceOf(accountCreator.address)).to.deep.equal(ethers.constants.One)
+      expect(await CollectionInstance.totalSupply()).to.deep.equal(ethers.constants.One)
+      expect(await CollectionInstance.ownerOf(ethers.constants.Zero)).to.equal(accountCreator.address)
       expect(await CollectionInstance.getApproved(ethers.constants.Zero)).to.equal(ethers.constants.AddressZero)
       expect(await CollectionInstance.tokenURI(ethers.constants.Zero)).to.equal(collectionParams[3] + '0')
     })
@@ -167,7 +166,7 @@ describe("Collection", () => {
       await expect(
         CollectionInstance
           .connect(accountUnauthorized)
-          .mintAndApprove(accountUnauthorized.address, accountUnauthorized.address, hashedMetadata)
+          .mintAndApprove(accountUnauthorized.address, hashedMetadata)
       ).to.be.revertedWith('Collection: ONLY_CREATOR')
     })
 
@@ -177,18 +176,17 @@ describe("Collection", () => {
         collectionParams,
         accountCreator,
         account1,
-        account2,
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
         CollectionInstance
           .connect(accountCreator)
-          .mintAndApprove(account1.address, account2.address, hashedMetadata)
+          .mintAndApprove(account1.address, hashedMetadata)
       ).to.be.fulfilled
-      expect(await CollectionInstance.balanceOf(account1.address)).to.deep.equal(ethers.constants.One)
-      expect(await CollectionInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
-      expect(await CollectionInstance.ownerOf(ethers.constants.Zero)).to.equal(account1.address)
-      expect(await CollectionInstance.getApproved(ethers.constants.Zero)).to.equal(account2.address)
+      expect(await CollectionInstance.balanceOf(accountCreator.address)).to.deep.equal(ethers.constants.One)
+      expect(await CollectionInstance.totalSupply()).to.deep.equal(ethers.constants.One)
+      expect(await CollectionInstance.ownerOf(ethers.constants.Zero)).to.equal(accountCreator.address)
+      expect(await CollectionInstance.getApproved(ethers.constants.Zero)).to.equal(account1.address)
       expect(await CollectionInstance.tokenURI(ethers.constants.Zero)).to.equal(collectionParams[3] + '0')
     })
   })
@@ -202,7 +200,7 @@ describe("Collection", () => {
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        CollectionInstance.connect(accountCreator).mint(accountCreator.address, hashedMetadata)
+        CollectionInstance.connect(accountCreator).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(
         CollectionInstance.connect(accountUnauthorized).burn(ethers.constants.Zero)
@@ -217,7 +215,14 @@ describe("Collection", () => {
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        CollectionInstance.connect(accountCreator).mint(account1.address, hashedMetadata)
+        CollectionInstance.connect(accountCreator).mint(hashedMetadata)
+      ).to.be.fulfilled
+      await expect(
+        CollectionInstance.connect(accountCreator).transferFrom(
+          accountCreator.address,
+          account1.address,
+          ethers.constants.Zero,
+        )
       ).to.be.fulfilled
       await expect(
         CollectionInstance.connect(accountCreator).burn(ethers.constants.Zero)
@@ -231,11 +236,11 @@ describe("Collection", () => {
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
-        CollectionInstance.connect(accountCreator).mint(accountCreator.address, hashedMetadata)
+        CollectionInstance.connect(accountCreator).mint(hashedMetadata)
       ).to.be.fulfilled
       await expect(CollectionInstance.connect(accountCreator).burn(ethers.constants.Zero)).to.be.fulfilled
       expect(await CollectionInstance.balanceOf(accountCreator.address)).to.deep.equal(ethers.constants.Zero)
-      expect(await CollectionInstance.currentTokenId()).to.deep.equal(ethers.constants.One)
+      expect(await CollectionInstance.totalSupply()).to.deep.equal(ethers.constants.One)
       await expect(
         CollectionInstance.ownerOf(ethers.constants.Zero)
       ).to.be.revertedWith('ERC721: invalid token ID')

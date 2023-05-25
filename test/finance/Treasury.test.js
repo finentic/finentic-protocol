@@ -31,8 +31,8 @@ describe("Treasury", () => {
         const VietnameseDongInstance = await VietnameseDong.deploy(ControlCenterInstance.address)
 
 
-        const Shared = await ethers.getContractFactory("Shared")
-        const SharedInstance = await Shared.deploy(ControlCenterInstance.address)
+        const SharedNFT = await ethers.getContractFactory("SharedNFT")
+        const SharedInstance = await SharedNFT.deploy(ControlCenterInstance.address)
         await SharedInstance.updateBaseURI('ipfs://')
 
         await ControlCenterInstance.addToWhitelist(TreasuryInstance.address)
@@ -212,7 +212,7 @@ describe("Treasury", () => {
                 ['string'],
                 ['metadata of nft']
             )
-            await SharedInstance.mint(accountOwner.address, hashedMetadata)
+            await SharedInstance.mint(hashedMetadata)
             await SharedInstance.transferFrom(
                 accountOwner.address,
                 TreasuryInstance.address,
@@ -257,7 +257,12 @@ describe("Treasury", () => {
                 ['string'],
                 ['metadata of nft']
             )
-            await SharedInstance.mint(TreasuryInstance.address, hashedMetadata)
+            await SharedInstance.mint(hashedMetadata)
+            await SharedInstance.transferFrom(
+                accountOwner.address,
+                TreasuryInstance.address,
+                tokenId,
+            )
             await TreasuryInstance.approveERC721(
                 SharedInstance.address,
                 accountOwner.address,
