@@ -247,6 +247,32 @@ describe("Collection", () => {
     })
   })
 
+  describe("Creator", () => {
+    it('Should able to update creator', async () => {
+      const {
+        CollectionInstance,
+        accountUnauthorized,
+        accountCreator,
+        account1,
+      } = await loadFixture(setupFixture)
+
+      await expect(
+        CollectionInstance.connect(accountUnauthorized).updateCreator(accountUnauthorized.address)
+      ).to.be.revertedWith('Collection: ONLY_CREATOR')
+
+      await CollectionInstance.connect(accountCreator).updateCreator(account1.address)
+
+      expect(await CollectionInstance.creator()).to.equal(account1.address)
+    })
+
+    it('Should able to create collection when unpause', async () => {
+      const { CollectionFactoryInstance, collectionParams } = await loadFixture(setupFixture)
+      await expect(CollectionFactoryInstance.pause()).to.be.fulfilled
+      await expect(CollectionFactoryInstance.unpause()).to.be.fulfilled
+      await CollectionFactoryInstance.createCollection(...collectionParams)
+    })
+  })
+
   describe("Pausable", () => {
     it('Should revert when create collection when paused', async () => {
       const { CollectionFactoryInstance, collectionParams } = await loadFixture(setupFixture)
