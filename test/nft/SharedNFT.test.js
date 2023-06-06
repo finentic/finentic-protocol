@@ -129,7 +129,6 @@ describe("SharedNFT", () => {
         ControlCenterInstance,
         SharedInstance,
         account1,
-        accountUnauthorized,
       } = await loadFixture(setupFixture)
       const hashedMetadata = ethers.utils.solidityKeccak256(['string'], ['metadata of nft'])
       await expect(
