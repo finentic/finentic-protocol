@@ -10,9 +10,9 @@ pragma solidity 0.8.13;
 
 abstract contract MarketItem {
     /**
-     * @notice The listed configuration for a specific NFT.
+     * @notice The listing configuration for a specific NFT.
      */
-    struct ItemListed {
+    struct ItemListing {
         /**
          * @notice The owner of the NFT which listed it in auction.
          */
@@ -58,11 +58,11 @@ abstract contract MarketItem {
 
     /**
      * @notice Stores the auction for each NFT.
-     * @dev NFT contract address => tokenId => ItemListed
+     * @dev NFT contract address => tokenId => ItemListing
      */
-    mapping(address => mapping(uint256 => ItemListed)) public itemListed;
+    mapping(address => mapping(uint256 => ItemListing)) public itemListing;
 
-    event Listed(address nftContract, uint256 tokenId, ItemListed item);
+    event Listing(address nftContract, uint256 tokenId, ItemListing item);
 
     event Bidded(
         address nftContract,
@@ -71,13 +71,13 @@ abstract contract MarketItem {
         uint256 amount
     );
 
-    event UpdateItemListed(
+    event UpdateItemListing(
         address nftContract,
         uint256 tokenId,
-        ItemListed item
+        ItemListing item
     );
 
-    event RemoveItemListed(address nftContract, uint256 tokenId);
+    event RemoveItemListing(address nftContract, uint256 tokenId);
 
     /**
      * @notice List an NFT.
@@ -88,16 +88,16 @@ abstract contract MarketItem {
     function _listingItem(
         address nftContract,
         uint256 tokenId,
-        ItemListed memory _item
+        ItemListing memory _item
     ) internal {
-        require(_item.startTime > block.timestamp, "MarketListed: STARTED");
+        require(_item.startTime > block.timestamp, "MarketItem: STARTED");
         require(
             (_item.startTime + 10 minutes) <= _item.endTime,
-            "MarketListed: INVALID_END_TIME"
+            "MarketItem: INVALID_END_TIME"
         );
-        // require(_item.gap > 0, "MarketListed: GAP_ZERO");
-        itemListed[nftContract][tokenId] = _item;
-        emit Listed(nftContract, tokenId, _item);
+        // require(_item.gap > 0, "MarketItem: GAP_ZERO");
+        itemListing[nftContract][tokenId] = _item;
+        emit Listing(nftContract, tokenId, _item);
     }
 
     /**
@@ -113,14 +113,14 @@ abstract contract MarketItem {
         address buyer,
         uint256 amount
     ) internal {
-        ItemListed storage _item = itemListed[nftContract][tokenId];
+        ItemListing storage _item = itemListing[nftContract][tokenId];
 
-        require(_item.startTime < block.timestamp, "MarketListed: NOT_STARTED");
-        require(_item.endTime > block.timestamp, "MarketListed: AUCTION_ENDED");
+        require(_item.startTime < block.timestamp, "MarketItem: NOT_STARTED");
+        require(_item.endTime > block.timestamp, "MarketItem: AUCTION_ENDED");
         require(
             // _item.amount + _item.gap <= amount,
             _item.amount < amount,
-            "MarketListed: AMOUNT_TOO_LOW"
+            "MarketItem: AMOUNT_TOO_LOW"
         );
 
         _item.buyer = buyer;
@@ -138,7 +138,7 @@ abstract contract MarketItem {
      * @param paymentToken The address of the token payment contract for this NFT.
      * @param amount The price at which someone could buy this NFT.
      */
-    function _updateItemListed(
+    function _updateItemListing(
         address nftContract,
         uint256 tokenId,
         uint256 startTime,
@@ -146,23 +146,23 @@ abstract contract MarketItem {
         address paymentToken,
         uint256 amount
     ) internal {
-        ItemListed storage _item = itemListed[nftContract][tokenId];
+        ItemListing storage _item = itemListing[nftContract][tokenId];
 
         if (!_item.isFixedPrice) {
             require(
-                _item.startTime > block.timestamp ||
-                    _item.endTime < block.timestamp,
-                "MarketListed: LISTING"
+                block.timestamp < _item.startTime ||
+                    block.timestamp > _item.endTime,
+                "MarketItem: LISTING"
             );
         }
-        // require(gap > 0, "MarketListed: GAP_ZERO");
+        // require(gap > 0, "MarketItem: GAP_ZERO");
 
         _item.startTime = startTime;
         _item.endTime = endTime;
         _item.paymentToken = paymentToken;
         _item.amount = amount;
 
-        emit UpdateItemListed(nftContract, tokenId, _item);
+        emit UpdateItemListing(nftContract, tokenId, _item);
     }
 
     /**
@@ -170,16 +170,16 @@ abstract contract MarketItem {
      * @param nftContract The address of the NFT contract.
      * @param tokenId The id of the NFT.
      */
-    function _removeItemListed(address nftContract, uint256 tokenId) internal {
-        ItemListed storage _item = itemListed[nftContract][tokenId];
+    function _removeItemListing(address nftContract, uint256 tokenId) internal {
+        ItemListing storage _item = itemListing[nftContract][tokenId];
         if (!_item.isFixedPrice) {
             require(
-                _item.startTime > block.timestamp ||
-                    _item.endTime < block.timestamp,
-                "MarketListed: LISTING"
+                block.timestamp < _item.startTime ||
+                    block.timestamp > _item.endTime,
+                "MarketItem: LISTING"
             );
         }
-        delete itemListed[nftContract][tokenId];
-        emit RemoveItemListed(nftContract, tokenId);
+        delete itemListing[nftContract][tokenId];
+        emit RemoveItemListing(nftContract, tokenId);
     }
 }

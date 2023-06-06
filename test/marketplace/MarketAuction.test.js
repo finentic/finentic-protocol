@@ -1,12 +1,12 @@
-// npx hardhat test ./test/marketplace/MarketListed.test.js --network hardhat
-// npx hardhat coverage --testfiles ./test/marketplace/MarketListed.test.js --network hardhat
+// npx hardhat test ./test/marketplace/MarketAuction.test.js --network hardhat
+// npx hardhat coverage --testfiles ./test/marketplace/MarketAuction.test.js --network hardhat
 
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 const { expect } = require("chai")
 const { ethers } = require("hardhat")
 const { setNextBlockTimestamp, getBlockTimestamp } = require("../utils/helpers")
 
-describe("MarketListed", () => {
+describe("MarketAuction", () => {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
@@ -101,6 +101,7 @@ describe("MarketListed", () => {
         ControlCenterInstance,
         TreasuryInstance,
       } = await loadFixture(setupFixture)
+
       expect(await MarketplaceInstance.controlCenter()).to.equal(ControlCenterInstance.address)
       expect(await MarketplaceInstance.treasury()).to.equal(TreasuryInstance.address)
       expect((await MarketplaceInstance.serviceFeePercent()).toString()).to.equal('125') // 1.25%
@@ -109,6 +110,7 @@ describe("MarketListed", () => {
 
     it('Should able to receiving ERC721', async () => {
       const { MarketplaceInstance, SharedInstance, accountOwner } = await loadFixture(setupFixture)
+
       const bytesData = ethers.utils.solidityKeccak256(
         ['string'],
         ['onERC721Received(address,address,uint256,bytes)']
@@ -144,10 +146,15 @@ describe("MarketListed", () => {
         CollectionInstance,
         accountSeller
       } = await loadFixture(setupFixture)
+
       const secondInDay = 60 * 60 * 24
       const tokenId = ethers.constants.Zero
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await expect(
         MarketplaceInstance.connect(accountSeller).listForSale(
           CollectionInstance.address, // nftContract
@@ -174,7 +181,7 @@ describe("MarketListed", () => {
             VietnameseDongInstance.address,
             ethers.utils.parseEther('50000000'),
           )
-      ).to.be.revertedWith('MarketListed: STARTED')
+      ).to.be.revertedWith('MarketItem: STARTED')
 
       await expect(
         MarketplaceInstance
@@ -189,7 +196,7 @@ describe("MarketListed", () => {
             VietnameseDongInstance.address,
             ethers.utils.parseEther('50000000'),
           )
-      ).to.be.revertedWith('MarketListed: INVALID_END_TIME')
+      ).to.be.revertedWith('MarketItem: INVALID_END_TIME')
 
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
@@ -202,17 +209,17 @@ describe("MarketListed", () => {
         ethers.utils.parseEther('50000000'),
       )
 
-      const itemListed = await MarketplaceInstance.itemListed(
+      const itemListing = await MarketplaceInstance.itemListing(
         CollectionInstance.address,
         tokenId,
       )
-      expect(itemListed.seller).to.equal(accountSeller.address)
-      expect(itemListed.buyer).to.equal(ethers.constants.AddressZero)
-      expect(itemListed.isFixedPrice).to.equal(false)
-      expect(itemListed.isRequiredShipping).to.equal(false)
-      expect(itemListed.startTime).to.equal(blockTimestamp + 60)
-      expect(itemListed.endTime).to.equal(blockTimestamp + 60 + secondInDay)
-      expect(itemListed.amount).to.deep.equal(ethers.utils.parseEther('50000000'))
+      expect(itemListing.seller).to.equal(accountSeller.address)
+      expect(itemListing.buyer).to.equal(ethers.constants.AddressZero)
+      expect(itemListing.isFixedPrice).to.equal(false)
+      expect(itemListing.isRequiredShipping).to.equal(false)
+      expect(itemListing.startTime).to.equal(blockTimestamp + 60)
+      expect(itemListing.endTime).to.equal(blockTimestamp + 60 + secondInDay)
+      expect(itemListing.amount).to.deep.equal(ethers.utils.parseEther('50000000'))
     })
 
     it('Should revert list for Auction when paused', async () => {
@@ -222,11 +229,16 @@ describe("MarketListed", () => {
         CollectionInstance,
         accountSeller
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
 
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.pause()
       await expect(
         MarketplaceInstance.connect(accountSeller).listForSale(
@@ -249,10 +261,15 @@ describe("MarketListed", () => {
         CollectionInstance,
         accountSeller
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
-      const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+      let blockTimestamp = await getBlockTimestamp()
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -263,7 +280,32 @@ describe("MarketListed", () => {
         VietnameseDongInstance.address,
         ethers.utils.parseEther('50000000'),
       )
-      await MarketplaceInstance.connect(accountSeller).updateItemListed(
+
+      await MarketplaceInstance.connect(accountSeller).updateItemListing(
+        CollectionInstance.address,
+        tokenId,
+        blockTimestamp + 60,
+        blockTimestamp + 60 + secondInDay,
+        VietnameseDongInstance.address,
+        ethers.utils.parseEther('60000000'),
+      )
+
+      await setNextBlockTimestamp(blockTimestamp + 60 + 1)
+      await expect(
+        MarketplaceInstance.connect(accountSeller).updateItemListing(
+          CollectionInstance.address,
+          tokenId,
+          blockTimestamp + 50,
+          blockTimestamp + secondInDay,
+          VietnameseDongInstance.address,
+          ethers.utils.parseEther('60000000'),
+        )
+      ).to.be.revertedWith('MarketItem: LISTING')
+
+      await setNextBlockTimestamp(blockTimestamp + 60 + secondInDay + 1)
+      blockTimestamp = await getBlockTimestamp()
+
+      await MarketplaceInstance.connect(accountSeller).updateItemListing(
         CollectionInstance.address,
         tokenId,
         blockTimestamp + 50,
@@ -271,17 +313,19 @@ describe("MarketListed", () => {
         VietnameseDongInstance.address,
         ethers.utils.parseEther('60000000'),
       )
-      const itemListed = await MarketplaceInstance.itemListed(
+
+      const itemListing = await MarketplaceInstance.itemListing(
         CollectionInstance.address,
         tokenId,
       )
-      expect(itemListed.seller).to.equal(accountSeller.address)
-      expect(itemListed.buyer).to.equal(ethers.constants.AddressZero)
-      expect(itemListed.isFixedPrice).to.equal(false)
-      expect(itemListed.isRequiredShipping).to.equal(false)
-      expect(itemListed.startTime).to.equal(blockTimestamp + 50)
-      expect(itemListed.endTime).to.equal(blockTimestamp + secondInDay)
-      expect(itemListed.amount).to.deep.equal(ethers.utils.parseEther('60000000'))
+
+      expect(itemListing.seller).to.equal(accountSeller.address)
+      expect(itemListing.buyer).to.equal(ethers.constants.AddressZero)
+      expect(itemListing.isFixedPrice).to.equal(false)
+      expect(itemListing.isRequiredShipping).to.equal(false)
+      expect(itemListing.startTime).to.equal(blockTimestamp + 50)
+      expect(itemListing.endTime).to.equal(blockTimestamp + secondInDay)
+      expect(itemListing.amount).to.deep.equal(ethers.utils.parseEther('60000000'))
     })
 
     it('Should revert update Auction item by account unauthorized', async () => {
@@ -292,10 +336,15 @@ describe("MarketListed", () => {
         accountSeller,
         accountUnauthorized
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -307,7 +356,7 @@ describe("MarketListed", () => {
         ethers.utils.parseEther('50000000'),
       )
       await expect(
-        MarketplaceInstance.connect(accountUnauthorized).updateItemListed(
+        MarketplaceInstance.connect(accountUnauthorized).updateItemListing(
           CollectionInstance.address,
           tokenId,
           blockTimestamp + 50,
@@ -325,10 +374,15 @@ describe("MarketListed", () => {
         CollectionInstance,
         accountSeller,
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -340,7 +394,7 @@ describe("MarketListed", () => {
         ethers.utils.parseEther('50000000'),
       )
       await expect(
-        MarketplaceInstance.connect(accountSeller).updateItemListed(
+        MarketplaceInstance.connect(accountSeller).updateItemListing(
           CollectionInstance.address,
           tokenId,
           blockTimestamp + 50,
@@ -359,10 +413,15 @@ describe("MarketListed", () => {
         accountSeller,
         accountBidder
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -381,7 +440,7 @@ describe("MarketListed", () => {
         ethers.utils.parseEther('50000000').add(ethers.utils.parseEther('1000000'))
       )
       await expect(
-        MarketplaceInstance.connect(accountSeller).updateItemListed(
+        MarketplaceInstance.connect(accountSeller).updateItemListing(
           CollectionInstance.address,
           tokenId,
           blockTimestamp + 50,
@@ -403,10 +462,15 @@ describe("MarketListed", () => {
         accountBidder2,
         accountUnauthorized
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -430,14 +494,14 @@ describe("MarketListed", () => {
             tokenId,
             ethers.utils.parseEther('50000000').add(ethers.utils.parseEther('1000000'))
           )
-      ).to.be.revertedWith('MarketListed: NOT_STARTED')
+      ).to.be.revertedWith('MarketItem: NOT_STARTED')
 
       await setNextBlockTimestamp(blockTimestamp + 60)
       await expect(
         MarketplaceInstance
           .connect(accountBidder)
           .bidding(CollectionInstance.address, tokenId, ethers.utils.parseEther('1'))
-      ).to.be.revertedWith('MarketListed: AMOUNT_TOO_LOW')
+      ).to.be.revertedWith('MarketItem: AMOUNT_TOO_LOW')
 
       const balanceOfAccountBidder2Before = await VietnameseDongInstance.balanceOf(accountBidder2.address)
       await MarketplaceInstance.connect(accountBidder2).bidding(
@@ -464,14 +528,14 @@ describe("MarketListed", () => {
         MarketplaceInstance
           .connect(accountBidder)
           .paymentProcessing(CollectionInstance.address, tokenId)
-      ).to.be.revertedWith('MarketListed: LISTING')
+      ).to.be.revertedWith('MarketItem: LISTING')
 
       await setNextBlockTimestamp(blockTimestamp + 60 + secondInDay + 1)
       await expect(
         MarketplaceInstance
           .connect(accountBidder)
           .bidding(CollectionInstance.address, tokenId, ethers.utils.parseEther('50000000').add(ethers.utils.parseEther('5000000')))
-      ).to.be.revertedWith('MarketListed: AUCTION_ENDED')
+      ).to.be.revertedWith('MarketItem: AUCTION_ENDED')
       await expect(
         MarketplaceInstance
           .connect(accountUnauthorized)
@@ -492,6 +556,64 @@ describe("MarketListed", () => {
       expect(balanceOfAccountSellerAfter.sub(balanceOfAccountSellerBefore)).to.deep.equal(lastBid.sub(lastBid.mul(serviceFeePercent).div(PERCENTAGE)))
     })
 
+    it('Should revert when trying to payment process an item fixed price', async () => {
+      const {
+        MarketplaceInstance,
+        VietnameseDongInstance,
+        CollectionInstance,
+        accountSeller,
+        accountBidder
+      } = await loadFixture(setupFixture)
+
+      const tokenId = ethers.constants.Zero
+      const secondInDay = 60 * 60 * 24
+      const blockTimestamp = await getBlockTimestamp()
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
+      await MarketplaceInstance.connect(accountSeller).listForSale(
+        CollectionInstance.address,
+        tokenId,
+        true, // isFixedPrice
+        true, // isRequiredShipping
+        blockTimestamp + 60,
+        blockTimestamp + 60 + secondInDay,
+        VietnameseDongInstance.address,
+        ethers.utils.parseEther('50000000'),
+      )
+
+      await VietnameseDongInstance.connect(accountBidder).approve(
+        MarketplaceInstance.address, ethers.constants.MaxUint256
+      )
+
+      await setNextBlockTimestamp(blockTimestamp + 60 + 1)
+
+      await expect(
+        MarketplaceInstance
+          .connect(accountBidder)
+          .bidding(
+            CollectionInstance.address,
+            tokenId,
+            ethers.utils.parseEther('50000001'),
+          )
+      ).to.be.revertedWith('Marketplace: FIXED_PRICE_ITEM')
+
+      await MarketplaceInstance.connect(accountBidder).buyItemFixedPrice(
+        CollectionInstance.address, tokenId,
+      )
+
+      await expect(
+        MarketplaceInstance
+          .connect(accountBidder)
+          .paymentProcessing(
+            CollectionInstance.address,
+            tokenId,
+          )
+      ).to.be.revertedWith('Marketplace: FIXED_PRICE_ITEM')
+    })
+
     it('Should able to cancel listing an Auction item by seller', async () => {
       const {
         MarketplaceInstance,
@@ -501,10 +623,15 @@ describe("MarketListed", () => {
         accountBidder,
         accountUnauthorized
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -521,7 +648,10 @@ describe("MarketListed", () => {
           CollectionInstance.address,
           tokenId,
         )
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -551,7 +681,7 @@ describe("MarketListed", () => {
             CollectionInstance.address,
             tokenId,
           )
-      ).to.be.revertedWith('MarketListed: LISTING')
+      ).to.be.revertedWith('MarketItem: LISTING')
 
       await MarketplaceInstance.connect(accountBidder).bidding(
         CollectionInstance.address,
@@ -582,10 +712,15 @@ describe("MarketListed", () => {
         accountBidder2,
         accountUnauthorized
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -609,14 +744,14 @@ describe("MarketListed", () => {
             tokenId,
             ethers.utils.parseEther('50000000').add(ethers.utils.parseEther('1000000'))
           )
-      ).to.be.revertedWith('MarketListed: NOT_STARTED')
+      ).to.be.revertedWith('MarketItem: NOT_STARTED')
 
       await setNextBlockTimestamp(blockTimestamp + 60)
       await expect(
         MarketplaceInstance
           .connect(accountBidder)
           .bidding(CollectionInstance.address, tokenId, ethers.utils.parseEther('1'))
-      ).to.be.revertedWith('MarketListed: AMOUNT_TOO_LOW')
+      ).to.be.revertedWith('MarketItem: AMOUNT_TOO_LOW')
 
       const balanceOfAccountBidder2Before = await VietnameseDongInstance.balanceOf(accountBidder2.address)
       await MarketplaceInstance.connect(accountBidder2).bidding(
@@ -673,10 +808,15 @@ describe("MarketListed", () => {
         accountSeller,
         accountBidder,
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -726,10 +866,15 @@ describe("MarketListed", () => {
         accountBidder,
         accountUnauthorized
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
@@ -779,10 +924,15 @@ describe("MarketListed", () => {
         accountSeller,
         accountBidder,
       } = await loadFixture(setupFixture)
+
       const tokenId = ethers.constants.Zero
       const secondInDay = 60 * 60 * 24
       const blockTimestamp = await getBlockTimestamp()
-      await CollectionInstance.connect(accountSeller).approve(MarketplaceInstance.address, tokenId)
+
+      await CollectionInstance.connect(accountSeller).approve(
+        MarketplaceInstance.address, tokenId
+      )
+
       await MarketplaceInstance.connect(accountSeller).listForSale(
         CollectionInstance.address,
         tokenId,
