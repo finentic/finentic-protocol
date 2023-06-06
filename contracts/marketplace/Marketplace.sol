@@ -68,7 +68,7 @@ contract Marketplace is MarketItem, MarketCore {
      * @param paymentToken The address of the token payment contract for this NFT.
      * @param amount The price at which someone could buy this NFT.
      */
-    function listingItem(
+    function listForSale(
         address nftContract,
         uint256 tokenId,
         bool isFixedPrice,
@@ -106,6 +106,8 @@ contract Marketplace is MarketItem, MarketCore {
     ) external whenNotPaused {
         ItemListed memory _itemListed = itemListed[nftContract][tokenId];
         require(_itemListed.isFixedPrice, "Marketplace: AUCTION_ITEM");
+        require(_itemListed.startTime < block.timestamp, "MarketListed: NOT_STARTED");
+        require(_itemListed.endTime > block.timestamp, "MarketListed: ENDED");
         require(_itemListed.buyer == address(0), "Marketplace: SOLD");
         IERC20 _paymentToken = IERC20(_itemListed.paymentToken);
         _paymentToken.transferFrom(
