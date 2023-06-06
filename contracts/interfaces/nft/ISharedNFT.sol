@@ -3,8 +3,8 @@
 
 pragma solidity 0.8.13;
 
-interface IShared {
-    function currentTokenId() external view returns (uint);
+interface ISharedNFT {
+    function totalSupply() external view returns (uint);
 
     function mint(
         address to,
