@@ -2,6 +2,7 @@
 
 Finentic is an open-source project based on Ethereum blockchain platform. This is also is the graduation project of a student at Dong A University, Vietnam. The project was conceived and implemented by Le Tuan Luc.
 
+
 ## Testing
 
 ```
@@ -11,7 +12,9 @@ npm run coverage
 
 <img width="1200" alt="Repo — Protocol - Coverage" src="./images/coverage.png" />
 
+
 ## Protocol
+
 
 ### Vietnamese Dong
 
@@ -23,26 +26,23 @@ Vietnamese Dong (VND) is a **fictional** fiat-backed stablecoin launched by the 
 Finentic Shared NFT (FxNFT) is an ERC-721 token, extended with hashed metadata for each token, and unique and as a result, not interchangeable. Finentic Shared NFT allowing any creator to mint an NFT.
 
 
-### Finentic Token Crowd Sale
-
-Finentic Token Crowd Sale is a base contract for managing a token crowd sale, allowing investors to purchase tokens with ether.
-
-
 ### Finentic Marketplace
 
 Finentic Marketplace is an online non-fungible token (NFT) marketplace. The Finentic Marketplace offers a marketplace allowing for non-fungible tokens to be sold through an auction.
+
 
 ## Finentic contract deployment addresses
 
 | Name               | Address                                                                                                                            |
 | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| ControlCenter      | [0x63Ed19D06bADBBcBED27343959a10Aff31E73304](https://testnet.snowtrace.io/address/0x63Ed19D06bADBBcBED27343959a10Aff31E73304#code) |
-| VietnameseDong     | [0x34a25677f3BE20Ec75E0F07472E6b4BE13365691](https://testnet.snowtrace.io/address/0x34a25677f3BE20Ec75E0F07472E6b4BE13365691#code) |
-| Shared             | [0x6fCa3D791aE84333f6CfBa97518E201C6DFD4830](https://testnet.snowtrace.io/address/0x6fCa3D791aE84333f6CfBa97518E201C6DFD4830#code) |
-| Collection         | [0x16955BC17a69F75F808A57177705Cf81b2D5C492](https://testnet.snowtrace.io/address/0x16955BC17a69F75F808A57177705Cf81b2D5C492#code) |
-| CollectionFactory  | [0xaf18dAB0b3f2B412c4176e95bA65000dd2bb0a66](https://testnet.snowtrace.io/address/0xaf18dAB0b3f2B412c4176e95bA65000dd2bb0a66#code) |
-| Treasury           | [0x581cfE1d12b36f20e441C196011275Ca72a09977](https://testnet.snowtrace.io/address/0x581cfE1d12b36f20e441C196011275Ca72a09977#code) |
-| Marketplace        | [0xf21eF335872bfA200066335C9883Eeb325175f54](https://testnet.snowtrace.io/address/0xf21eF335872bfA200066335C9883Eeb325175f54#code) |
+| ControlCenter      | [0x02177dbe73Df1E26fA1054082bD46584dCc56647](https://testnet.snowtrace.io/address/0x02177dbe73Df1E26fA1054082bD46584dCc56647#code) |
+| VietnameseDong     | [0x189DEc993Cd001f2bEF5C251B68aE50B120834F0](https://testnet.snowtrace.io/address/0x189DEc993Cd001f2bEF5C251B68aE50B120834F0#code) |
+| SharedNFT          | [0x9698e228156c81c46e79B55fab38aBe7Cb0bdAA7](https://testnet.snowtrace.io/address/0x9698e228156c81c46e79B55fab38aBe7Cb0bdAA7#code) |
+| Collection         | [0xAC0a55753eFa6066d46d695f943385D980Fd8b64](https://testnet.snowtrace.io/address/0xAC0a55753eFa6066d46d695f943385D980Fd8b64#code) |
+| CollectionFactory  | [0xac9f92B500792580D7C8FA019c69e60edfdA8d4d](https://testnet.snowtrace.io/address/0xac9f92B500792580D7C8FA019c69e60edfdA8d4d#code) |
+| Treasury           | [0x8f6094C875179C9A7b4189363E7C7da5B265f024](https://testnet.snowtrace.io/address/0x8f6094C875179C9A7b4189363E7C7da5B265f024#code) |
+| Marketplace        | [0x2d379507798B7Ec2b4311ed2de0e8dD4e2A465Df](https://testnet.snowtrace.io/address/0x2d379507798B7Ec2b4311ed2de0e8dD4e2A465Df#code) |
+
 
 ## License
 
